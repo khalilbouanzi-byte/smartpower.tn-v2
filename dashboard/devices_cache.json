@@ -1,0 +1,72 @@
+[
+  {
+    "id": "dev-76f3fc",
+    "name": "Interrupteur Principal 76f3fc",
+    "type": "SWITCH",
+    "model": "SP-SW1",
+    "channels": 1,
+    "online": 1,
+    "state": "{\"switch\": \"on\", \"power\": 120, \"voltage\": 230.2, \"current\": 0.52}",
+    "claimCode": "SP-76F3",
+    "room_name": "Salon",
+    "home_name": "Maison Principale",
+    "ip_address": "192.168.1.45",
+    "ble_mac": "E4:65:B8:76:F3:FC"
+  },
+  {
+    "id": "dev-pow-elite",
+    "name": "Sonoff POW Élite 16A",
+    "type": "BREAKER",
+    "model": "SP-POW-16",
+    "channels": 1,
+    "online": 1,
+    "state": "{\"switch\": \"off\", \"power\": 1850, \"voltage\": 228.4, \"current\": 8.1}",
+    "claimCode": "SP-POW1",
+    "room_name": "Salon",
+    "home_name": "Maison Principale",
+    "ip_address": "192.168.1.46",
+    "ble_mac": "30:AE:A4:PO:W1:16"
+  },
+  {
+    "id": "dev-s31-bed",
+    "name": "Prise Connectée S31",
+    "type": "PLUG",
+    "model": "SP-PLUG-10",
+    "channels": 1,
+    "online": 1,
+    "state": "{\"switch\": \"on\", \"power\": 85, \"voltage\": 229.8, \"current\": 0.37}",
+    "claimCode": "SP-S31B",
+    "room_name": "Chambre",
+    "home_name": "Maison Principale",
+    "ip_address": "192.168.1.47",
+    "ble_mac": "24:0A:C4:S3:1B:ED"
+  },
+  {
+    "id": "dev-test-ble",
+    "name": "Lampe BLE Bureau",
+    "type": "SWITCH",
+    "model": "SP-SW1",
+    "channels": 1,
+    "online": 1,
+    "state": "{\"switch\": \"off\", \"power\": 45, \"voltage\": 230.0, \"current\": 0.43}",
+    "claimCode": "SP--BLE",
+    "room_name": "Bureau",
+    "home_name": "Maison Principale",
+    "ip_address": "192.168.1.50",
+    "ble_mac": "AA:BB:CC:DD:EE:FF"
+  },
+  {
+    "id": "dev-ble-clim",
+    "name": "Climatiseur Salon BLE",
+    "type": "SWITCH",
+    "model": "SP-SW1",
+    "channels": 1,
+    "online": 1,
+    "state": "{\"switch\": \"off\", \"power\": 1200, \"voltage\": 230.0, \"current\": 0.43}",
+    "claimCode": "SP-CLIM",
+    "room_name": "Salon",
+    "home_name": "Maison Principale",
+    "ip_address": "192.168.1.50",
+    "ble_mac": "C4:4F:33:AA:BB:CC"
+  }
+]
