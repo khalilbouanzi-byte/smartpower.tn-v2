@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#f97316" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="SmartPower Mobile" />
+  <title>SmartPower Mobile & Bluetooth BLE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #f97316;
+      --primary-dark: #ea580c;
+      --primary-light: #fff7ed;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --blue: #3b82f6;
+      --blue-bg: #eff6ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: #0f172a;
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .mobile-frame {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    }
+
+    header {
+      padding: 44px 20px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .app-brand h1 { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; color: var(--text); }
+    .app-brand p { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+
+    .sync-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+    .sync-dot.offline { background: #ef4444; }
+
+    main { flex: 1; padding: 16px; overflow-y: auto; padding-bottom: 90px; }
+
+    /* Energy Banner */
+    .energy-card {
+      background: #0f172a;
+      color: #fff;
+      border-radius: 22px;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.2);
+    }
+    .energy-label { font-size: 10px; font-weight: 800; color: #94a3b8; letter-spacing: 0.8px; }
+    .energy-val { font-size: 30px; font-weight: 900; margin-top: 4px; }
+    .energy-val span { font-size: 15px; color: var(--primary); font-weight: 700; }
+    .energy-sub { font-size: 11px; color: #64748b; margin-top: 4px; }
+    .energy-pill { background: #1e293b; padding: 6px 12px; border-radius: 12px; font-size: 13px; font-weight: 800; color: #38bdf8; text-align: right; }
+    .energy-cost { font-size: 13px; font-weight: 700; color: #cbd5e1; margin-top: 6px; text-align: right; }
+
+    /* Bluetooth Action Button */
+    .ble-banner-btn {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border: 1.5px solid #93c5fd;
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      margin-bottom: 18px;
+      transition: all 0.2s;
+    }
+    .ble-banner-btn:active { transform: scale(0.98); }
+    .ble-icon-wrap { font-size: 26px; }
+    .ble-info { flex: 1; }
+    .ble-title { font-size: 14px; font-weight: 800; color: #1e3a8a; }
+    .ble-sub { font-size: 11px; color: #3b82f6; margin-top: 2px; }
+    .ble-arrow { font-size: 16px; font-weight: 800; color: #1d4ed8; }
+
+    /* Rooms Bar */
+    .rooms-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      scrollbar-width: none;
+    }
+    .rooms-bar::-webkit-scrollbar { display: none; }
+    .room-chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: #fff;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .room-chip.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+
+    /* Devices Grid */
+    .devices-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .device-card {
+      background: #ffffff;
+      border: 1.5px solid #f1f5f9;
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s;
+    }
+    .device-card.on {
+      border-color: var(--primary);
+      background: #fffaf5;
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .dev-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .device-card.on .dev-icon {
+      background: #ffedd5;
+    }
+
+    /* Switch */
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      background: #cbd5e1;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .toggle-switch.on { background: var(--primary); }
+    .toggle-knob {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .toggle-switch.on .toggle-knob { left: 23px; }
+
+    .dev-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .dev-room { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
+    .card-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #f8fafc;
+      padding-top: 8px;
+      margin-top: auto;
+    }
+    .dev-power { font-size: 12px; font-weight: 800; color: var(--text-muted); }
+    .device-card.on .dev-power { color: var(--primary); }
+    .dev-ble-tag {
+      font-size: 9px;
+      font-weight: 800;
+      color: #3b82f6;
+      background: #dbeafe;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    /* Bottom Nav Bar */
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: 10px;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .nav-item.active { color: var(--primary); }
+    .nav-item span { font-size: 20px; }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: flex-end;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-sheet {
+      width: 100%;
+      background: #ffffff;
+      border-radius: 28px 28px 0 0;
+      padding: 20px;
+      max-height: 88vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .sheet-title { font-size: 18px; font-weight: 800; }
+    .sheet-close { font-size: 20px; font-weight: 700; color: #94a3b8; cursor: pointer; border: none; background: none; }
+
+    .radar-box {
+      background: var(--blue-bg);
+      border: 1.5px solid #bfdbfe;
+      border-radius: 18px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .radar-pulse {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #3b82f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      animation: pulse 1.6s infinite ease-out;
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6);
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6); }
+      70% { box-shadow: 0 0 0 16px rgba(59, 130, 246, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+
+    .ble-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .ble-device-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f8fafc;
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ble-device-item:hover, .ble-device-item.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .ble-dev-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border: 1px solid var(--border);
+    }
+    .ble-dev-title { font-size: 14px; font-weight: 700; }
+    .ble-dev-sub { font-size: 11px; color: var(--text-muted); }
+    .ble-rssi { font-size: 11px; font-weight: 800; color: var(--success); text-align: right; }
+
+    .form-group { margin-bottom: 12px; }
+    .form-label { font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block; }
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      background: #f8fafc;
+      font-family: inherit;
+    }
+    .form-input:focus { outline: none; border-color: var(--primary); background: #fff; }
+
+    .pair-btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 14px;
+      box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
+      transition: all 0.2s;
+    }
+    .pair-btn:active { transform: scale(0.98); }
+    .pair-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .toast-msg {
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      color: #166534;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 12px;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-frame">
+    <!-- Header -->
+    <header>
+      <div class="app-brand">
+        <h1>SmartPower</h1>
+        <p>Maison Principale</p>
+      </div>
+      <div class="sync-status" id="syncStatusBtn" onclick="fetchModules()">
+        <div class="sync-dot" id="syncDot"></div>
+        <span id="syncText">Sync 192.168.1.10:8080</span>
+      </div>
+    </header>
+
+    <!-- Main Viewport -->
+    <main>
+      <!-- Energy Summary -->
+      <div class="energy-card">
+        <div>
+          <div class="energy-label">PUISSANCE ACTIVE EN DIRECT</div>
+          <div class="energy-val"><span id="totalWatts">0</span> <span>Watts</span></div>
+          <div class="energy-sub"><span id="activeCount">0</span> appareil(s) actifs • 230 V</div>
+        </div>
+        <div>
+          <div class="energy-pill"><span id="dailyKwh">14.82</span> kWh</div>
+          <div class="energy-cost"><span id="dailyCost">2.74</span> TND</div>
+        </div>
+      </div>
+
+      <!-- Bluetooth Action Banner -->
+      <div class="ble-banner-btn" onclick="openBleModal()">
+        <div class="ble-icon-wrap">📡</div>
+        <div class="ble-info">
+          <div class="ble-title">Ajouter par Bluetooth (BLE)</div>
+          <div class="ble-sub">Recherche d'appareils ESP32 / Sonoff à proximité</div>
+        </div>
+        <div class="ble-arrow">➔</div>
+      </div>
+
+      <!-- Rooms Bar -->
+      <div class="rooms-bar" id="roomsBar">
+        <div class="room-chip active" onclick="filterRoom('Toutes', this)">Toutes</div>
+        <div class="room-chip" onclick="filterRoom('Salon', this)">Salon</div>
+        <div class="room-chip" onclick="filterRoom('Chambre', this)">Chambre</div>
+        <div class="room-chip" onclick="filterRoom('Cuisine', this)">Cuisine</div>
+        <div class="room-chip" onclick="filterRoom('Bureau', this)">Bureau</div>
+        <div class="room-chip" onclick="filterRoom('Jardin', this)">Jardin</div>
+      </div>
+
+      <div class="section-head">
+        <span>ÉQUIPEMENTS CONNECTÉS (<span id="devicesCount">0</span>)</span>
+        <span id="lastSyncLabel" style="font-weight: 500;">Sync : en cours...</span>
+      </div>
+
+      <!-- Devices Grid -->
+      <div class="devices-grid" id="devicesGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <div class="nav-item active"><span>🏠</span>Domicile</div>
+      <div class="nav-item"><span>⬡</span>Scénario</div>
+      <div class="nav-item"><span>⊞</span>Aperçu</div>
+      <div class="nav-item"><span>💬</span>Message</div>
+      <div class="nav-item"><span>👤</span>Profil</div>
+    </nav>
+
+    <!-- Bluetooth Add Device Modal -->
+    <div class="modal-backdrop" id="bleModal">
+      <div class="modal-sheet">
+        <div class="sheet-head">
+          <div class="sheet-title">📡 Recherche Bluetooth (BLE)</div>
+          <button class="sheet-close" onclick="closeBleModal()">✕</button>
+        </div>
+
+        <div class="radar-box">
+          <div class="radar-pulse">📶</div>
+          <div>
+            <div style="font-size: 14px; font-weight: 800; color: #1e3a8a;" id="radarTitle">Scan Bluetooth actif...</div>
+            <div style="font-size: 11px; color: #3b82f6;" id="radarSub">Détection des balises BLE ESP32 & Sonoff</div>
+          </div>
+        </div>
+
+        <div class="form-label">APPAREILS BLE DÉTECTÉS À PROXIMITÉ</div>
+        <div class="ble-list" id="bleList">
+          <!-- Populated dynamically -->
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nom de l'équipement</label>
+          <input type="text" class="form-input" id="devNameInput" placeholder="Ex. Lampe Salon, Chauffe-eau..." />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Pièce d'affectation</label>
+          <select class="form-input" id="devRoomSelect">
+            <option value="Salon">Salon</option>
+            <option value="Chambre">Chambre</option>
+            <option value="Cuisine">Cuisine</option>
+            <option value="Bureau">Bureau</option>
+            <option value="Jardin">Jardin</option>
+          </select>
+        </div>
+
+        <div class="toast-msg" id="pairToast">🎉 Appareil BLE synchronisé avec succès !</div>
+
+        <button class="pair-btn" id="pairBtn" onclick="confirmPairing()">
+          ⚡ Appairer & Synchroniser dans la base
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://' + (window.location.hostname || '192.168.1.10') + ':8080';
+    let currentRoom = 'Toutes';
+    let devices = [];
+    let selectedBle = null;
+
+    const BLE_DISCOVERY_POOL = [
+      { id: 'sp-esp32-dual', name: 'SmartPower ESP32 Dual', type: 'SWITCH', model: 'SP-SW2-BLE', mac: 'E4:65:B8:F2:ED:08', rssi: -46, icon: '🔲', room: 'Salon', watts: 160 },
+      { id: 'sp-pow-elite-ble', name: 'Sonoff POW Élite 16A BLE', type: 'BREAKER', model: 'SP-POW-16', mac: '30:AE:A4:PO:W1:16', rssi: -52, icon: '⚡', room: 'Salon', watts: 1850 },
+      { id: 'sp-switch-ble', name: 'Interrupteur SP-SW1', type: 'SWITCH', model: 'SP-SW1', mac: '24:0A:C4:76:F3:FC', rssi: -60, icon: '💡', room: 'Chambre', watts: 90 },
+      { id: 'sp-plug-s31-ble', name: 'Prise Intelligente S31', type: 'PLUG', model: 'SP-PLUG-10', mac: 'A0:20:A6:S3:1B:ED', rssi: -67, icon: '🔌', room: 'Bureau', watts: 75 }
+    ];
+
+    async function fetchModules() {
+      try {
+        const res = await fetch(API_URL + '/api/modules');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        devices = (data.modules || []).map(m => {
+          let s = {};
+          try { s = typeof m.state === 'string' ? JSON.parse(m.state) : (m.state || {}); } catch(e) {}
+          const isOn = s.switch === 'on';
+          return {
+            id: m.id,
+            name: m.name || m.id,
+            room: m.room_name || 'Salon',
+            isOn: isOn,
+            watts: s.power || (isOn ? 120 : 0),
+            type: (m.type || 'SWITCH').toLowerCase(),
+            mac: m.ble_mac || ('E4:65:B8:' + m.id.slice(-4).toUpperCase())
+          };
+        });
+        document.getElementById('syncDot').classList.remove('offline');
+        document.getElementById('syncText').innerText = 'Sync 192.168.1.10:8080';
+      } catch (err) {
+        console.warn('Backend offline, using local state:', err);
+        document.getElementById('syncDot').classList.add('offline');
+        document.getElementById('syncText').innerText = 'Mode Local';
+      }
+      renderDevices();
+      updateTelemetry();
+      const d = new Date();
+      document.getElementById('lastSyncLabel').innerText = 'Sync: ' + d.toLocaleTimeString();
+    }
+
+    async function toggleDevice(id) {
+      const dev = devices.find(d => d.id === id);
+      if (!dev) return;
+      dev.isOn = !dev.isOn;
+      dev.watts = dev.isOn ? Math.max(dev.watts, 110) : 0;
+      renderDevices();
+      updateTelemetry();
+
+      try {
+        await fetch(API_URL + '/api/modules/' + id + '/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ state: dev.isOn ? 'on' : 'off' })
+        });
+      } catch (e) {
+        console.warn('Toggle failed:', e);
+      }
+    }
+
+    function renderDevices() {
+      const grid = document.getElementById('devicesGrid');
+      const filtered = currentRoom === 'Toutes' ? devices : devices.filter(d => d.room.toLowerCase() === currentRoom.toLowerCase());
+      document.getElementById('devicesCount').innerText = filtered.length;
+
+      grid.innerHTML = filtered.map(d => {
+        const icon = d.type.includes('breaker') ? '⚡' : d.type.includes('plug') ? '🔌' : '💡';
+        return `
+          <div class="device-card ${d.isOn ? 'on' : ''}">
+            <div class="card-top">
+              <div class="dev-icon">${icon}</div>
+              <div class="toggle-switch ${d.isOn ? 'on' : ''}" onclick="toggleDevice('${d.id}')">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="dev-name">${d.name}</div>
+            <div class="dev-room">${d.room}</div>
+            <div class="card-bottom">
+              <span class="dev-power">${d.isOn ? d.watts + ' W' : '0 W'}</span>
+              <span class="dev-ble-tag">BLE</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateTelemetry() {
+      const total = devices.filter(d => d.isOn).reduce((acc, d) => acc + d.watts, 0);
+      const active = devices.filter(d => d.isOn).length;
+      document.getElementById('totalWatts').innerText = total;
+      document.getElementById('activeCount').innerText = active;
+      const kwh = (total * 0.012 + 14.82).toFixed(2);
+      document.getElementById('dailyKwh').innerText = kwh;
+      document.getElementById('dailyCost').innerText = (kwh * 0.185).toFixed(2);
+    }
+
+    function filterRoom(room, el) {
+      currentRoom = room;
+      document.querySelectorAll('.room-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      renderDevices();
+    }
+
+    function openBleModal() {
+      document.getElementById('bleModal').classList.add('open');
+      startBleScan();
+    }
+
+    function closeBleModal() {
+      document.getElementById('bleModal').classList.remove('open');
+    }
+
+    function startBleScan() {
+      const list = document.getElementById('bleList');
+      list.innerHTML = '<div style="text-align:center; padding: 16px; color:#64748b; font-size:13px;">Recherche d\'ondes Bluetooth en cours...</div>';
+      selectedBle = null;
+
+      setTimeout(() => {
+        const existingIds = new Set(devices.map(d => d.id));
+        const available = BLE_DISCOVERY_POOL.filter(d => !existingIds.has(d.id));
+
+        if (available.length === 0) {
+          list.innerHTML = '<div style="text-align:center; padding: 16px; color:#64748b; font-size:13px;">Tous les appareils Bluetooth sont déjà appairés !</div>';
+          return;
+        }
+
+        list.innerHTML = available.map(d => `
+          <div class="ble-device-item" onclick="selectBleDevice('${d.id}')" id="ble-item-${d.id}">
+            <div class="ble-dev-icon">${d.icon}</div>
+            <div style="flex:1;">
+              <div class="ble-dev-title">${d.name}</div>
+              <div class="ble-dev-sub">MAC: ${d.mac} • ${d.model}</div>
+            </div>
+            <div class="ble-rssi">●●●○ ${d.rssi} dBm</div>
+          </div>
+        `).join('');
+      }, 700);
+    }
+
+    function selectBleDevice(id) {
+      const dev = BLE_DISCOVERY_POOL.find(d => d.id === id);
+      if (!dev) return;
+      selectedBle = dev;
+      document.querySelectorAll('.ble-device-item').forEach(el => el.classList.remove('selected'));
+      const activeEl = document.getElementById('ble-item-' + id);
+      if (activeEl) activeEl.classList.add('selected');
+      document.getElementById('devNameInput').value = dev.name;
+      document.getElementById('devRoomSelect').value = dev.room;
+    }
+
+    async function confirmPairing() {
+      const name = document.getElementById('devNameInput').value.trim();
+      const room = document.getElementById('devRoomSelect').value;
+      if (!name) return alert('Veuillez entrer un nom pour l\'équipement.');
+
+      const devId = selectedBle ? selectedBle.id : ('sp-' + Date.now().toString(36));
+      const btn = document.getElementById('pairBtn');
+      btn.innerText = 'Connexion BLE & Synchronisation...';
+      btn.disabled = true;
+
+      try {
+        await fetch(API_URL + '/api/modules/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: devId,
+            name: name,
+            room: room,
+            type: selectedBle ? selectedBle.type : 'SWITCH',
+            model: selectedBle ? selectedBle.model : 'SP-SW1',
+            ble_mac: selectedBle ? selectedBle.mac : ('E4:65:B8:' + devId.slice(-4).toUpperCase()),
+            watts: selectedBle ? selectedBle.watts : 120
+          })
+        });
+      } catch (e) {
+        console.warn('API error, saving locally:', e);
+      }
+
+      document.getElementById('pairToast').style.display = 'block';
+      setTimeout(() => {
+        document.getElementById('pairToast').style.display = 'none';
+        btn.innerText = '⚡ Appairer & Synchroniser dans la base';
+        btn.disabled = false;
+        closeBleModal();
+        fetchModules();
+      }, 1100);
+    }
+
+    // Auto poll every 3 seconds
+    fetchModules();
+    setInterval(fetchModules, 3000);
+  </script>
+</body>
+</html>

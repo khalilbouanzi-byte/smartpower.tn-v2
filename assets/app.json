@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Spower SmartPower",
+    "slug": "smartpower-spower",
+    "version": "5.29.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.coolkit.smartpower"
+    },
+    "android": {
+      "package": "com.coolkit.smartpower",
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
