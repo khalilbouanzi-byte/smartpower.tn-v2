@@ -1,0 +1,21 @@
+export const Colors = {
+  primary: '#0284c7',       // Spower Primary Blue
+  primaryLight: '#e0f2fe',
+  primaryDark: '#0369a1',
+  blueButton: '#38bdf8',
+  background: '#f8fafc',
+  card: '#ffffff',
+  text: '#0f172a',
+  textMuted: '#64748b',
+  textLight: '#94a3b8',
+  border: '#f1f5f9',
+  divider: '#e2e8f0',
+  success: '#10b981',
+  warning: '#f59e0b',
+  danger: '#ef4444',
+  switchOff: '#e2e8f0',
+  switchOn: '#3b82f6',
+  greenLeaf: '#ecfdf5',
+  amberFlash: '#fef3c7',
+  blueHome: '#eff6ff',
+};
